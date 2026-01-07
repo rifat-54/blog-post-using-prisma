@@ -22,6 +22,24 @@ export const auth = betterAuth({
     autoSignIn: false,
     requireEmailVerification: true,
   },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: "USER",
+        required: false,
+      },
+      phone: {
+        type: "string",
+        required: false,
+      },
+      status: {
+        type: "string",
+        defaultValue: "ACTIVE",
+        required: false,
+      },
+    },
+  },
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url, token }, request) => {
@@ -102,22 +120,11 @@ export const auth = betterAuth({
       }
     },
   },
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        defaultValue: "USER",
-        required: false,
-      },
-      phone: {
-        type: "string",
-        required: false,
-      },
-      status: {
-        type: "string",
-        defaultValue: "ACTIVE",
-        required: false,
-      },
+  socialProviders: {
+        google: { 
+            clientId: process.env.GOOGLE_CLIENT_ID as string, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+        }, 
     },
-  },
+ 
 });
