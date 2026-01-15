@@ -16,11 +16,16 @@ const createPost = async (
 };
 
 const getAllPost = async (payload: {
-  search: string | undefined
-  tags: string[] | []
+  search: string | undefined,
+  tags: string[] | [],
   isFeatured:boolean | undefined,
   status:PostStatus | undefined,
-  authorId:string | undefined
+  authorId:string | undefined,
+  page:number,
+  limit:number,
+  skip:number,
+  sortBy:string | undefined,
+  sortOrder:string | undefined
 }) => {
   const andCondition:PostWhereInput[]=[]
   if(payload.search){
@@ -76,9 +81,19 @@ if(payload.authorId){
   })
 }
   const data = await prisma.post.findMany({
+    take:payload.limit,
+    skip:payload.skip,
     where: {
       AND: andCondition
     },
+    orderBy:payload.sortBy && payload.sortOrder ?
+      {
+        [payload.sortBy]:payload.sortOrder
+      }:
+      {
+        createdAt:"desc"
+      }
+    
   });
   return data;
 };
