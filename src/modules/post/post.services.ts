@@ -16,89 +16,125 @@ const createPost = async (
 };
 
 const getAllPost = async (payload: {
-  search: string | undefined,
-  tags: string[] | [],
-  isFeatured:boolean | undefined,
-  status:PostStatus | undefined,
-  authorId:string | undefined,
-  page:number,
-  limit:number,
-  skip:number,
-  sortBy:string | undefined,
-  sortOrder:string | undefined
+  search: string | undefined;
+  tags: string[] | [];
+  isFeatured: boolean | undefined;
+  status: PostStatus | undefined;
+  authorId: string | undefined;
+  page: number;
+  limit: number;
+  skip: number;
+  sortBy: string;
+  sortOrder: string;
 }) => {
-  const andCondition:PostWhereInput[]=[]
-  if(payload.search){
-    andCondition.push(
-      {
-          OR: [
-            {
-              title: {
-                contains: payload.search as string,
-                mode: "insensitive",
-              },
-            },
-            {
-              content: {
-                contains: payload.search as string,
-                mode: "insensitive",
-              },
-            },
-            {
-              tags: {
-                has: payload.search as string,
-              },
-            },
-          ],
-        },
-    )
-  }
-  if(payload.tags){
-    andCondition.push(
-      {
-          tags: {
-            hasEvery: payload.tags,
+  const andCondition: PostWhereInput[] = [];
+  if (payload.search) {
+    andCondition.push({
+      OR: [
+        {
+          title: {
+            contains: payload.search as string,
+            mode: "insensitive",
           },
         },
-    )
+        {
+          content: {
+            contains: payload.search as string,
+            mode: "insensitive",
+          },
+        },
+        {
+          tags: {
+            has: payload.search as string,
+          },
+        },
+      ],
+    });
   }
-
-  if(typeof payload.isFeatured ==='boolean'){
+  if (payload.tags) {
     andCondition.push({
-      isFeatured:payload.isFeatured
-    })
+      tags: {
+        hasEvery: payload.tags,
+      },
+    });
   }
 
-  if(payload.status){
+  if (typeof payload.isFeatured === "boolean") {
     andCondition.push({
-      status:payload.status
-    })
+      isFeatured: payload.isFeatured,
+    });
   }
 
-if(payload.authorId){
-  andCondition.push({
-    authorId:payload.authorId
-  })
-}
+  if (payload.status) {
+    andCondition.push({
+      status: payload.status,
+    });
+  }
+
+  if (payload.authorId) {
+    andCondition.push({
+      authorId: payload.authorId,
+    });
+  }
   const data = await prisma.post.findMany({
-    take:payload.limit,
-    skip:payload.skip,
+    take: payload.limit,
+    skip: payload.skip,
     where: {
-      AND: andCondition
+      AND: andCondition,
     },
-    orderBy:payload.sortBy && payload.sortOrder ?
-      {
-        [payload.sortBy]:payload.sortOrder
-      }:
-      {
-        createdAt:"desc"
-      }
-    
+    orderBy: {
+      [payload.sortBy]: payload.sortOrder,
+    },
+    // orderBy:payload.sortBy && payload.sortOrder ?
+    //   {
+    //     [payload.sortBy]:payload.sortOrder
+    //   }:
+    //   {
+    //     createdAt:"desc"
+    //   }
   });
-  return data;
+
+  const total = await prisma.post.count({
+    where: {
+      AND: andCondition,
+    },
+  });
+
+  return {
+    data,
+    pagination: {
+      total,
+      page: payload.page,
+      limit: payload.limit,
+      skip: payload.skip,
+      totalPage: Math.ceil(total / payload.limit),
+    },
+  };
+};
+
+const getPostById = async (postId: string) => {
+  return await prisma.$transaction(async (tx) => {
+     await tx.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+    });
+    const data = await tx.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+    return data;
+  });
 };
 
 export const postServices = {
   createPost,
   getAllPost,
+  getPostById,
 };

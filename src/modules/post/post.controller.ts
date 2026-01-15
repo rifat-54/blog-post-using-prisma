@@ -48,9 +48,6 @@ const getAllPost = async (req: Request, res: Response) => {
 
       const { page,limit,skip,sortBy,sortOrder}=paginationSortingHelper(req.query)
 
-  
-
-
     const result = await postServices.getAllPost({
       search: searchString,
       tags,
@@ -74,7 +71,27 @@ const getAllPost = async (req: Request, res: Response) => {
   }
 };
 
+const getPostById=async(req:Request,res:Response)=>{
+  try {
+    const id=req.params.id
+    if(!id){
+      throw new Error("Post id is required!")
+    }
+
+    const result=await postServices.getPostById(id)
+
+    res.status(200).json(result);
+  } catch (error) {
+     res.status(400).json({
+      success: false,
+      message: "server error",
+      details: error,
+    });
+  }
+}
+
 export const postController = {
   createPost,
   getAllPost,
+  getPostById
 };
