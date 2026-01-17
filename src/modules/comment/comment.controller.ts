@@ -19,6 +19,40 @@ const createComment=async(req:Request,res:Response)=>{
     }
 }
 
+const getCommentById=async(req:Request,res:Response)=>{
+    try {
+       const id=req.params.commentId as string
+        const result=await commentServices.getCommentById(id)
+
+        res.status(200).json(result)
+
+    } catch (error) {
+        res.status(400).json({
+            success:false,
+            message:"error fetch comment!!",
+            details:error
+        })
+    }
+}
+
+const getCommentByAuthor=async(req:Request,res:Response)=>{
+    try {
+       const id=req.params.authorId as string
+        const result=await commentServices.getCommentByAuthor(id)
+
+        res.status(200).json(result)
+
+    } catch (error) {
+        res.status(400).json({
+            success:false,
+            message:"error fetch comment!!",
+            details:error
+        })
+    }
+}
+
 export const commentController={
-    createComment
+    createComment,
+    getCommentById,
+    getCommentByAuthor
 }
