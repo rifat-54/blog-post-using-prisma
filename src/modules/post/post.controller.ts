@@ -90,8 +90,50 @@ const getPostById=async(req:Request,res:Response)=>{
   }
 }
 
+const getMyPost=async(req:Request,res:Response)=>{
+  
+  try {
+    const id=req.user?.id
+    const result=await postServices.getMyPost(id as string)
+
+    res.status(200).json({
+      success:true,
+      data:result
+    })
+  } catch (error:any) {
+    console.log(error)
+    res.status(400).json({
+      success:false,
+      messsage:error.message
+    })
+  }
+
+}
+const updatePost=async(req:Request,res:Response)=>{
+  
+  try {
+    const id=req.user?.id
+    const postId=req.params.postId
+    const result=await postServices.updatePost(postId as string,id as string,req.body)
+
+    res.status(200).json({
+      success:true,
+      data:result
+    })
+  } catch (error:any) {
+    console.log(error)
+    res.status(400).json({
+      success:false,
+      messsage:error.message
+    })
+  }
+
+}
+
 export const postController = {
   createPost,
   getAllPost,
-  getPostById
+  getPostById,
+  getMyPost,
+  updatePost
 };
