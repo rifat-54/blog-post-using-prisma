@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { postServices } from "./post.services";
 import { PostStatus } from "../../../generated/prisma/enums";
 import paginationSortingHelper from "../../helpers/paginationSortingHelper";
+import { userRole } from "../../middleware/auth";
 
 
 const createPost = async (req: Request, res: Response) => {
@@ -114,7 +115,30 @@ const updatePost=async(req:Request,res:Response)=>{
   try {
     const id=req.user?.id
     const postId=req.params.postId
-    const result=await postServices.updatePost(postId as string,id as string,req.body)
+    const isAdmin=req.user?.role===userRole.ADMIN
+    const result=await postServices.updatePost(postId as string,id as string,req.body,isAdmin)
+
+    res.status(200).json({
+      success:true,
+      data:result
+    })
+  } catch (error:any) {
+    console.log(error)
+    res.status(400).json({
+      success:false,
+      messsage:error.message
+    })
+  }
+
+}
+
+const deletePost=async(req:Request,res:Response)=>{
+  
+  try {
+    const id=req.user?.id
+    const postId=req.params.postId
+    const isAdmin=req.user?.role===userRole.ADMIN
+    const result=await postServices.deletePost(postId as string,id as string,isAdmin)
 
     res.status(200).json({
       success:true,
@@ -135,5 +159,6 @@ export const postController = {
   getAllPost,
   getPostById,
   getMyPost,
-  updatePost
+  updatePost,
+  deletePost
 };
