@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { postServices } from "./post.services";
 import { PostStatus } from "../../../generated/prisma/enums";
 import paginationSortingHelper from "../../helpers/paginationSortingHelper";
 import { userRole } from "../../middleware/auth";
 
 
-const createPost = async (req: Request, res: Response) => {
+const createPost = async (req: Request, res: Response,next:NextFunction) => {
   try {
     console.log(req.user);
     if (!req.user) {
@@ -16,10 +16,7 @@ const createPost = async (req: Request, res: Response) => {
     const result = await postServices.createPost(req.body, req.user.id);
     res.status(201).json(result);
   } catch (error) {
-    res.status(400).json({
-      error: "failed Post",
-      details: error,
-    });
+    next(error)
   }
 };
 
@@ -110,7 +107,7 @@ const getMyPost=async(req:Request,res:Response)=>{
   }
 
 }
-const updatePost=async(req:Request,res:Response)=>{
+const updatePost=async(req:Request,res:Response,next:NextFunction)=>{
   
   try {
     const id=req.user?.id
@@ -123,13 +120,8 @@ const updatePost=async(req:Request,res:Response)=>{
       data:result
     })
   } catch (error:any) {
-    console.log(error)
-    res.status(400).json({
-      success:false,
-      messsage:error.message
-    })
+    next(error)
   }
-
 }
 
 const deletePost=async(req:Request,res:Response)=>{
