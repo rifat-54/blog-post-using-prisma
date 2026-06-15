@@ -7,13 +7,14 @@ import { userRole } from "../../middleware/auth";
 
 const createPost = async (req: Request, res: Response,next:NextFunction) => {
   try {
-    console.log(req.user);
+    console.log("lsl;dk",req.user);
     if (!req.user) {
       return res.status(400).json({
         error: "failed Post",
       });
     }
     const result = await postServices.createPost(req.body, req.user.id);
+    console.log("resutlt",result)
     res.status(201).json(result);
   } catch (error) {
     next(error)
